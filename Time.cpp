@@ -1,5 +1,12 @@
 #include"Time.h"
 
+bool areValidSecMin(size_t number) {
+	return (number >= 0 && number <= 60);
+}
+bool isValidHour(size_t number) {
+	return (number >= 0 && number <= 24);
+}
+
 Time::Time():hours(0),minutes(0),seconds(0),busy(0),changeDay(0){}
 
 bool Time::isValidTime() const
@@ -12,7 +19,7 @@ bool Time::isTBusy() const
 	return busy;
 }
 
-Time::Time(const Time& other)
+void Time::cpyOther(const Time& other)
 {
 	if (other.isValidTime()==1) {
 		this->setHours(other.getHours());
@@ -22,7 +29,7 @@ Time::Time(const Time& other)
 	}
 }
 
-Time::Time(size_t seconds, size_t minutes, size_t hours, bool busy)
+void Time::createTime(size_t seconds, size_t minutes, size_t hours, bool busy)
 {
 	if ((isValidHour(hours) && areValidSecMin(seconds) && areValidSecMin(minutes)) == 1) {
 		this->setSeconds(seconds);
@@ -231,7 +238,8 @@ Time& Time::sum(const Time& other) const
 
 void Time::timePasses()
 {
-	Time sec(1, 0, 0, 0);
+	Time sec;
+	sec.createTime(1, 0, 0, 0);
 	*this = this->sum(sec);
 }
 
@@ -249,4 +257,5 @@ void Time::timelater(size_t sec, size_t min, size_t hour)
 	this->busy = 0;
 	this->changeDay = 0;
 }
+
 

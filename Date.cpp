@@ -1,4 +1,33 @@
 #include"Date.h"
+bool isValidMonth(unsigned number)
+{
+	return (number > 0 && number <= 12);
+}
+
+bool isValidYear(unsigned number) {
+	return (number > 0);
+}
+
+bool Date::isLeapYear() const {
+	if (year <= 1916)
+		return year % 4 == 0;
+	return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+}
+
+void Date::ifNineteenSixteen() {
+	{
+		if (year == 1916 && month == 4 && day >= 1 && day <= 13)
+			day = 15;
+	}
+}
+
+void takeName(char* day, const char* name) {
+	int size = strlen(name) + 1;
+	for (int i = 0; i < size; i++) {
+		day[i] = name[i];
+	}
+	day[size] = '\0';
+} 
 
 void Date::changeDaysInMonth()
 {
@@ -21,9 +50,9 @@ void Date::changeDaysInMonth()
 		daysInMonth = 30;
 	}
 }
-Date::Date():year(0), month(0), day(0),daysInMonth(31) {}
+Date::Date():year(1), month(1), day(1),daysInMonth(31) {}
 
-Date::Date(const Date& date)
+void Date::copyFromOther(const Date& date)
 {
 	if (date.validDate()==1) {
 		this->setYear(date.getYear());
@@ -35,9 +64,11 @@ Date::Date(const Date& date)
 
 Date::Date(unsigned year, unsigned month, unsigned day, const Time& time)
 {
-	if (isValidYear(year)&&isValidMonth(month)&&isValidDay(day)&&time.isValidTime()) {
-		setYear(year);
+	this->setYear(1); this->setMonth(1); this->setDay(day);
+	std::cout << isValidDay(day) << ' ' << day << std::endl;
+	if(isValidYear(year)&&isValidMonth(month)&&isValidDay(day)&&time.isValidTime()) {
 		setMonth(month);
+		setYear(year);
 		setDay(day);
 		setTime(time);
 	}
@@ -45,27 +76,30 @@ Date::Date(unsigned year, unsigned month, unsigned day, const Time& time)
 
 bool Date::isValidDay(unsigned number) const
 {
-	if (isLeapYear() && getMonth() == 2) {
-		return(number > 0 || number <= 29);
+	if ( getMonth() == 2) {
+		if (isLeapYear()) {
+			return(number > 0 && number <= 29);
+		}
+		else {
+			return (number > 0 && number <= 28);
+		}
+		
 	}
 	else {
-		if (getMonth() == 2) {
-			return (number > 0 || number <= 28);
-		}
-		else if (getMonth() >= 1 && getMonth() <= 7) {
+		if (getMonth() >= 1 && getMonth() <= 7) {
 			if (getMonth() % 2 == 0) {
-				return (number > 0 || number <= 30);
+				return (number > 0 && number <= 30);
 			}
 			else {
-				return (number > 0 || number <= 31);
+				return (number > 0 && number <= 31);
 			}
 		}
 		else if (getMonth() > 7 && getMonth() <= 12) {
 			if (getMonth() % 2 == 0) {
-				return (number > 0 || number <= 31);
+				return (number > 0 && number <= 31);
 			}
 			else {
-				return (number > 0 || number <= 30);
+				return (number > 0 && number <= 30);
 			}
 		}
 		else {
@@ -153,7 +187,7 @@ void Date::setLater(unsigned day)
 
 void Date::setYear(unsigned year)
 {
-	if (isValidYear(year)==1) {
+	if (isValidYear(year)) {
 		this->year = year;
 		setLater(getDay());
 	}
@@ -169,7 +203,7 @@ void Date::setMonth(unsigned month)
 
 void Date::setDay(unsigned day)
 {
-	if (isValidDay(day)==1) {
+	if (isValidDay(day)) {
 		this->day = day;
 		ifNineteenSixteen();
 		changeDaysInMonth();
@@ -236,17 +270,17 @@ Date& Date::timeLater(const Time& other) const
 	return res;
 }
 
-Date& Date::daysLater(unsigned number) const///setdays31
+Date& Date::daysLater(unsigned number) const
 {
 	Date copy(*this);
-	copy.day = 1;///here is changedaysinmonth
+	copy.day = 1;
 	unsigned dayToAdd= number + copy.getDay();
 	if (copy.getDaysInMonth() < dayToAdd) {
-		dayToAdd = dayToAdd - (copy.getDaysInMonth() - this->getDay())-1;///stavapurvi i -1 zaradi parvi
+		dayToAdd = dayToAdd - (copy.getDaysInMonth() - this->getDay())-1;
 		copy=copy.monthsLater(1);
 		copy.changeDaysInMonth();
 		while (copy.getDaysInMonth() < dayToAdd) {
-			copy=monthsLater(1);////tam ima proverka za dnite v meseca iza godinata proverca +dni ako e visokosna
+			copy=monthsLater(1);
 			dayToAdd -= copy.getDaysInMonth();
 			copy.changeDaysInMonth();
 		}
@@ -256,7 +290,7 @@ Date& Date::daysLater(unsigned number) const///setdays31
 	return copy;
 }
 
-Date& Date::monthsLater(unsigned number) const///change year but if days>days in month change 
+Date& Date::monthsLater(unsigned number) const
 {
 	Date copy(*this);
 	unsigned initDay = getDay();
@@ -269,7 +303,7 @@ Date& Date::monthsLater(unsigned number) const///change year but if days>days in
 	copy.setMonth(1);
 	if (monthsToAdd >= 12) {
 		monthsToAdd= monthsToAdd-(12-this->getMonth())-1;
-		copy = copy.yearsLater(1);///ima proverka za dnite v meseca
+		copy = copy.yearsLater(1);
 		if (copy.isLeapYear()) {
 			initDay++;
 		}
@@ -325,7 +359,7 @@ void Date::operator=(const Date& date)
 	}
 }
 
-int Date::compare(const Date& other) const
+int Date::compareD(const Date& other) const
 {
 	if (this->getYear() > other.getYear()) {
 		return 1;
@@ -413,7 +447,7 @@ const char* Date::dayOfWeek() const
 	return takeDay;
 }
 
-void Date::print() const
+void Date::printD() const
 {
 	std::cout << getYear() << '.';
 	std::cout << getMonth() <<'.';
@@ -427,6 +461,18 @@ void Date::printNoTime() const
 	std::cout << getYear() << '.';
 	std::cout << getMonth() << '.';
 	std::cout << getDay() ;
-	std::cout << '.' << std::endl;
+	std::cout <<  std::endl;
 }
+
+void Date::createInvalidDate(unsigned year, unsigned month, unsigned day, const Time& time)
+{
+	this->year = year;
+	this->month = month;
+	this->day = day;
+	this->time = time;
+}
+
+
+
+
 

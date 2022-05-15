@@ -11,8 +11,8 @@ public:
 	Time();
 	bool isValidTime()const;
 	bool isTBusy()const;
-	Time(const Time& other);
-	Time(size_t seconds, size_t minutes, size_t hours, bool busy);
+	void cpyOther(const Time& other);
+	void createTime(size_t seconds, size_t minutes, size_t hours, bool busy);
 	size_t getSeconds()const;
 	size_t getMinutes()const;
 	size_t getHours()const;
@@ -29,9 +29,5 @@ public:
 	void print()const;
 	void timelater(size_t sec,size_t min,size_t hour);
 };
-bool areValidSecMin(size_t number) {
-	return (number >= 0 && number <= 60);
-}
-bool isValidHour(size_t number) {
-	return (number >= 0 && number <= 24);
-}
+
+
